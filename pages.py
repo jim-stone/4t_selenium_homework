@@ -47,29 +47,22 @@ class AddProjectPage (AbstractBasePage):
             EC.visibility_of_element_located(self.input_description),
             EC.visibility_of_element_located(self.button_save)
         ))
-
-        self.prefix = fake.cryptocurrency_code() + fake.cryptocurrency_code()
+        self.prefix = fake.cryptocurrency_code() + fake.bothify('??#??#')
         self.name = fake.catch_phrase()
         self.description = fake.text(500)
-
         self.browser.find_element(*self.input_prefix).send_keys(self.prefix)
         self.browser.find_element(*self.input_name).send_keys(self.name)
         self.browser.find_element(*self.input_description).send_keys(self.description)
         self.browser.find_element(*self.button_save).click()
-
-        # TODO - export to separate method?
         self.browser.find_element(*self.link_projects).click()
         return ProjectsPage(self.browser), self.name
 
 
 class ProjectsPage(AbstractBasePage):
-    # selektor zwraca 2 elementy, wybieramy pierwszy z tej kolekcji
+    # selektor zwraca 2 elementy, w metodzie wybieramy pierwszy z tej kolekcji
     add_project_link = (By.CSS_SELECTOR, "a.button_link")
-
     search_input = (By.CSS_SELECTOR, "#search")
     search_button = (By.CSS_SELECTOR, "#j_searchButton")
-
-    # selektor zwraca kolekcję, wybieramy pierwszy element
     search_result = (By.CSS_SELECTOR, "td a")
 
     def start_add_project(self):
