@@ -4,6 +4,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 from faker import Faker
 
 fake = Faker()
+
+
 class AbstractBasePage:
     def __init__(self, browser):
         self.browser = browser
@@ -21,13 +23,12 @@ class LoginPage(AbstractBasePage):
         return self
 
     def login(self, login, password):
-
         self.browser.find_element(*self.input_login).send_keys(login)
         self.browser.find_element(*self.input_password).send_keys(password)
         self.browser.find_element(*self.button_login).click()
 
 
-class AddProjectPage (AbstractBasePage):
+class AddProjectPage(AbstractBasePage):
     input_name = (By.CSS_SELECTOR, '#name')
     input_prefix = (By.CSS_SELECTOR, '#prefix')
     input_description = (By.CSS_SELECTOR, '#description')
@@ -36,26 +37,33 @@ class AddProjectPage (AbstractBasePage):
 
     def __init__(self, browser):
         super().__init__(browser)
-        self.name = None
-        self.prefix = None
-        self.description = None
+        self.project_name = None
+        self.project_prefix = None
+        self.project_description = None
 
-    def fill_project_data(self):
+    def create_project(self):
+        self._generate_project_data()
         self.wait.until(EC.all_of(
             EC.visibility_of_element_located(self.input_name),
             EC.visibility_of_element_located(self.input_prefix),
             EC.visibility_of_element_located(self.input_description),
             EC.visibility_of_element_located(self.button_save)
         ))
-        self.prefix = fake.cryptocurrency_code() + fake.bothify('??#??#')
-        self.name = fake.catch_phrase()
-        self.description = fake.text(500)
-        self.browser.find_element(*self.input_prefix).send_keys(self.prefix)
-        self.browser.find_element(*self.input_name).send_keys(self.name)
-        self.browser.find_element(*self.input_description).send_keys(self.description)
+
+        self.browser.find_element(*self.input_prefix).send_keys(self.project_prefix)
+        self.browser.find_element(*self.input_name).send_keys(self.project_name)
+        self.browser.find_element(*self.input_description).send_keys(self.project_description)
         self.browser.find_element(*self.button_save).click()
+        self._navigate_to_projects_list()
+        return ProjectsPage(self.browser), self.project_name
+
+    def _generate_project_data(self):
+        self.project_prefix = fake.cryptocurrency_code() + fake.bothify('???')
+        self.project_name = fake.catch_phrase()
+        self.project_description = fake.text(500)
+
+    def _navigate_to_projects_list(self):
         self.browser.find_element(*self.link_projects).click()
-        return ProjectsPage(self.browser), self.name
 
 
 class ProjectsPage(AbstractBasePage):
@@ -72,9 +80,9 @@ class ProjectsPage(AbstractBasePage):
 
     def search_project(self, project_name):
         self.wait.until(EC.all_of(
-                EC.visibility_of_element_located(self.search_input),
-                EC.visibility_of_element_located(self.search_button)
-            ))
+            EC.visibility_of_element_located(self.search_input),
+            EC.visibility_of_element_located(self.search_button)
+        ))
         self.browser.find_element(*self.search_input).send_keys(project_name)
         self.browser.find_element(*self.search_button).click()
         self.wait.until(
@@ -83,7 +91,8 @@ class ProjectsPage(AbstractBasePage):
         elements = self.browser.find_elements(*self.search_result)
         return [e.text for e in elements]
 
-class HomePage (AbstractBasePage):
+
+class HomePage(AbstractBasePage):
     user_email = (By.CSS_SELECTOR, ".user-info small")
     admin_link = (By.CSS_SELECTOR, "a[title=Administracja]")
 

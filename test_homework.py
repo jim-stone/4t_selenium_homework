@@ -13,6 +13,6 @@ def test_can_add_project(chrome_browser, logged_in):
     home_page = HomePage(browser=chrome_browser)
     projects_page = home_page.navigate_to_admin_panel()
     add_project_page = projects_page.start_add_project()
-    projects_page_updated, project_name = add_project_page.fill_project_data()
+    projects_page_updated, project_name = add_project_page.create_project()
     search_result = projects_page_updated.search_project(project_name)
     assert project_name in search_result
